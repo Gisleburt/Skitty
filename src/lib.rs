@@ -2,11 +2,11 @@ extern crate notify;
 extern crate zip;
 
 use notify::{RecommendedWatcher, Watcher, RecursiveMode};
-use zip::{read::ZipFile, ZipArchive};
+use zip::{read::ZipFile, ZipArchive, ZipWriter, result::ZipResult};
 use std::sync::mpsc::channel;
 use std::time::Duration;
 use std::path::Path;
-use std::fs::{File, create_dir_all};
+use std::fs::{File, read_dir, create_dir_all};
 use std::io::{copy, prelude::*};
 
 fn zipfile_to_file<T>(mut zipfile: ZipFile, dir: T)
@@ -26,7 +26,7 @@ fn zipfile_to_file<T>(mut zipfile: ZipFile, dir: T)
     println!("{}", file_path.to_string_lossy());
 }
 
-pub fn zip_to_dir<T, U>(from: T, to: U) -> zip::result::ZipResult<()>
+pub fn zip_to_dir<T, U>(from: T, to: U) -> ZipResult<()>
     where T: AsRef<Path>,
           U: AsRef<Path>
 {
@@ -35,8 +35,53 @@ pub fn zip_to_dir<T, U>(from: T, to: U) -> zip::result::ZipResult<()>
     let mut zip = ZipArchive::new(file)?;
     for i in 0..zip.len() {
         let mut file = zip.by_index(i).unwrap();
-        zipfile_to_file(file, &to);
+        zipfile_to_file(file, to.as_ref());
     }
+    Ok(())
+}
+
+pub fn dir_to_zip<T, U>(from: T, to: U) -> zip::result::ZipResult<()>
+    where T: AsRef<Path>,
+          U: AsRef<Path>
+{
+    let mut file = File::create(to.as_ref()).expect("Couldn't open file");
+    let mut zip = zip::ZipWriter::new(file);
+
+    dir_to_zip_recurse(&mut zip, from.as_ref(), from.as_ref());
+
+    Ok(())
+}
+
+fn dir_to_zip_recurse<T, U>(zip: &mut ZipWriter<File>, dir: T, root: U)
+    where T: AsRef<Path>,
+          U: AsRef<Path>
+{
+    if dir.as_ref().is_dir() {
+        for entry in read_dir(dir).expect("Couldn't read dir") {
+            let entry = entry.expect("Something wrong with the entry");
+            if entry.path().is_dir() {
+                dir_to_zip_recurse(zip, entry.path(), root.as_ref());
+            }
+            if entry.path().is_file() {
+                write_file_to_zip(zip, entry.path(), root.as_ref());
+            }
+        }
+    }
+}
+
+fn write_file_to_zip<T, U>(zip: &mut ZipWriter<File>, file_path: T, root_path: U) -> ZipResult<()>
+    where T: AsRef<Path>,
+          U: AsRef<Path>
+{
+    let relative_path = file_path.as_ref().strip_prefix(root_path.as_ref()).expect("Paths not related");
+
+    let mut bytes: Vec<u8> = Vec::new();
+    let mut file = File::open(&file_path).expect("Couldn't open file");
+    file.read_to_end(&mut bytes);
+
+    let options = zip::write::FileOptions::default().compression_method(zip::CompressionMethod::Stored);
+    zip.start_file(relative_path.to_string_lossy(), options)?;
+    zip.write(&bytes)?;
     Ok(())
 }
 
