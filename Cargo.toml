@@ -5,3 +5,4 @@ authors = ["Daniel Mason"]
 
 [dependencies]
 notify = "^4.0.0"
+zip = "^0.4.2"
