@@ -1,0 +1,10 @@
+name: skitty
+author: Daniel Mason <daniel@danielmason.com>
+about: Structures and destructures sketch files for use with git
+subcommands:
+  - watch:
+      about: Watch for file changes and automatically structure or destructure the sketch file
+      args:
+        - FILE:
+            index: 1
+            help: print debug information
