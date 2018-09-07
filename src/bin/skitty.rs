@@ -1,5 +1,7 @@
 #[macro_use]
 extern crate clap;
+#[macro_use]
+extern crate failure;
 
 extern crate skitty;
 
@@ -18,7 +20,10 @@ fn main() {
     match matches.subcommand() {
         ("watch", Some(matches)) => {
             if let Some(file) = matches.value_of("FILE") {
-                watch(file);
+                if let Err(e) = watch(&file) {
+                    eprintln!("{}", e);
+                    std::process::exit(1);
+                }
             } else {
                 eprintln!("You must specify a file or directory to watch");
                 std::process::exit(1);
@@ -28,15 +33,6 @@ fn main() {
             app.print_help();
         },
     }
-
-//    if let Some(matches) = matches.subcommand_matches("watch") {
-//        if matches.is_present("FILE") {
-//            println!("Printing debug info...");
-//        } else {
-//            eprintln!("Directory watching is not yet supported");
-//            std::process::exit(1);
-//        }
-//    }
 
 
 //    let path = std::env::current_dir().expect("current dir");

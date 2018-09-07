@@ -1,16 +1,23 @@
+#[macro_use]
+extern crate failure;
 extern crate notify;
 extern crate zip;
 
+mod error;
+
 use notify::{RecommendedWatcher, Watcher, RecursiveMode};
-use zip::{read::ZipFile, ZipArchive, ZipWriter, result::ZipResult};
+use zip::{read::ZipFile, ZipArchive, ZipWriter};
 use std::sync::mpsc::channel;
 use std::time::Duration;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::fs::{File, read_dir, create_dir_all};
 use std::io::{copy, prelude::*};
+use error::{SkittyError, SkittyResult};
+use std::borrow::Cow;
+use std::ffi::OsStr;
 
 fn zipfile_to_file<T>(mut zipfile: ZipFile, dir: T)
-    where T: AsRef<Path>
+    where T: AsRef<Path>,
 {
     // Test Path is acceptable
     let file_path = dir.as_ref().join(zipfile.sanitized_name());
@@ -26,9 +33,9 @@ fn zipfile_to_file<T>(mut zipfile: ZipFile, dir: T)
     println!("{}", file_path.to_string_lossy());
 }
 
-pub fn zip_to_dir<T, U>(from: T, to: U) -> ZipResult<()>
+pub fn zip_to_dir<T, U>(from: T, to: U) -> SkittyResult<()>
     where T: AsRef<Path>,
-          U: AsRef<Path>
+          U: AsRef<Path>,
 {
     create_dir_all(to.as_ref());
     let file = File::open(from.as_ref()).expect("Couldn't open file");
@@ -40,9 +47,9 @@ pub fn zip_to_dir<T, U>(from: T, to: U) -> ZipResult<()>
     Ok(())
 }
 
-pub fn dir_to_zip<T, U>(from: T, to: U) -> zip::result::ZipResult<()>
+pub fn dir_to_zip<T, U>(from: T, to: U) -> SkittyResult<()>
     where T: AsRef<Path>,
-          U: AsRef<Path>
+          U: AsRef<Path>,
 {
     let mut file = File::create(to.as_ref()).expect("Couldn't open file");
     let mut zip = zip::ZipWriter::new(file);
@@ -54,7 +61,7 @@ pub fn dir_to_zip<T, U>(from: T, to: U) -> zip::result::ZipResult<()>
 
 fn dir_to_zip_recurse<T, U>(zip: &mut ZipWriter<File>, dir: T, root: U)
     where T: AsRef<Path>,
-          U: AsRef<Path>
+          U: AsRef<Path>,
 {
     if dir.as_ref().is_dir() {
         for entry in read_dir(dir).expect("Couldn't read dir") {
@@ -69,9 +76,9 @@ fn dir_to_zip_recurse<T, U>(zip: &mut ZipWriter<File>, dir: T, root: U)
     }
 }
 
-fn write_file_to_zip<T, U>(zip: &mut ZipWriter<File>, file_path: T, root_path: U) -> ZipResult<()>
+fn write_file_to_zip<T, U>(zip: &mut ZipWriter<File>, file_path: T, root_path: U) -> SkittyResult<()>
     where T: AsRef<Path>,
-          U: AsRef<Path>
+          U: AsRef<Path>,
 {
     let relative_path = file_path.as_ref().strip_prefix(root_path.as_ref()).expect("Paths not related");
 
@@ -85,27 +92,72 @@ fn write_file_to_zip<T, U>(zip: &mut ZipWriter<File>, file_path: T, root_path: U
     Ok(())
 }
 
-pub fn watch<T>(path: T) -> notify::Result<()>
-    where T: AsRef<Path>
+fn make_absolute<'a>(path: &'a AsRef<Path>) -> SkittyResult<Cow<'a, Path>>
 {
-    println!("{:#?}", path.as_ref()); Ok(())
-//    // Create a channel to receive the events.
-//    let (tx, rx) = channel();
-//
-//    // Automatically select the best implementation for your platform.
-//    // You can also access each implementation directly e.g. INotifyWatcher.
-//    let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_secs(2))?;
-//
-//    // Add a path to be watched. All files and directories at that path and
-//    // below will be monitored for changes.
-//    watcher.watch(path.as_ref(), RecursiveMode::Recursive)?;
-//
-//    // This is a simple loop, but you may want to use more complex logic here,
-//    // for example to handle I/O.
-//    loop {
-//        match rx.recv() {
-//            Ok(event) => println!("{:?}", event),
-//            Err(e) => println!("watch error: {:?}", e),
-//        }
-//    }
+    let path = path.as_ref();
+    if path.is_absolute() {
+        Ok(path.into())
+    } else {
+        Ok(std::env::current_dir()?.join(path).into())
+    }
+}
+
+fn is_sketch_file<T>(path: T) -> SkittyResult<bool>
+    where T: AsRef<Path>,
+{
+    let path = path.as_ref();
+    if !path.is_file() {
+        Ok(false)
+    } else if path.extension().and_then(OsStr::to_str).eq(&Some("sketch")) {
+        Ok(true)
+    } else {
+        Err(SkittyError::NotASketchFile(path.to_owned()))
+    }
+}
+
+fn make_sketch<'a>(path: &'a Path) -> SkittyResult<Cow<'a, Path>>
+{
+//    let path = path.as_ref();
+    if is_sketch_file(path)? {
+        Ok(path.into())
+    } else if path.is_dir() {
+        Ok(path.with_extension(".sketch").into())
+    } else {
+        Err(SkittyError::ProjectNotFound(path.to_owned()))
+    }
+}
+
+fn get_dir<'a>(path: &'a Path) -> SkittyResult<Cow<'a, Path>>
+{
+    if path.is_dir() {
+        Ok(path.into())
+    } else {
+        Ok(path.into())
+    }
+}
+
+pub fn watch(path: &AsRef<Path>) -> SkittyResult<()>
+{
+    let absolute_path = make_absolute(path)?;
+    let sketch_file = make_sketch(absolute_path.as_ref())?;
+    let absolute_dir = get_dir(sketch_file.as_ref())?;
+    // Create a channel to receive the events.
+    let (tx, rx) = channel();
+
+    // Automatically select the best implementation for your platform.
+    // You can also access each implementation directly e.g. INotifyWatcher.
+    let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_secs(2))?;
+
+    // Add a path to be watched. All files and directories at that path and
+    // below will be monitored for changes.
+    watcher.watch(path.as_ref(), RecursiveMode::Recursive)?;
+
+    // This is a simple loop, but you may want to use more complex logic here,
+    // for example to handle I/O.
+    loop {
+        match rx.recv() {
+            Ok(event) => println!("{:?}", event),
+            Err(e) => println!("watch error: {:?}", e),
+        }
+    }
 }
