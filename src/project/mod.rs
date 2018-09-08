@@ -52,7 +52,7 @@ impl Project {
         // This is a simple loop, but you may want to use more complex logic here,
         // for example to handle I/O.
         loop {
-            let event = rx.recv()?;
+            rx.recv()?;
             println!("Sketch file has changed");
             self.sketch_to_git()?;
             println!("Sketch file has been deconstructed");
