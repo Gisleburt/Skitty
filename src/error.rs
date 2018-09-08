@@ -17,7 +17,9 @@ pub enum SkittyError {
     #[fail(display = "Project not found: {:?}", _0)]
     ProjectNotFound(PathBuf),
     #[fail(display = "{:?} is not a sketch file", _0)]
-    NotASketchFile(PathBuf)
+    NotASketchFile(PathBuf),
+    #[fail(display = "Something went wrong getting the dir name from the file name {:?}", _0)]
+    UnknownDirProblem(PathBuf),
 }
 
 impl From<NotifyError> for SkittyError {
