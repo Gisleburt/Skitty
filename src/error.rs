@@ -2,7 +2,7 @@ use std::io::Error as IoError;
 use notify::Error as NotifyError;
 use zip::result::ZipError;
 use std::result::Result;
-use std::path::PathBuf;
+use std::path::{PathBuf, StripPrefixError};
 
 pub type SkittyResult<T> = Result<T, SkittyError>;
 
@@ -20,6 +20,8 @@ pub enum SkittyError {
     NotASketchFile(PathBuf),
     #[fail(display = "Something went wrong getting the dir name from the file name {:?}", _0)]
     UnknownDirProblem(PathBuf),
+    #[fail(display = "Unable to make path relative while zipping {:?}", _0)]
+    StripPrefixError(StripPrefixError)
 }
 
 impl From<NotifyError> for SkittyError {
@@ -37,5 +39,11 @@ impl From<ZipError> for SkittyError {
 impl From<IoError> for SkittyError {
     fn from(err: IoError) -> SkittyError {
         SkittyError::IoError(err)
+    }
+}
+
+impl From<StripPrefixError> for SkittyError {
+    fn from(err: StripPrefixError) -> SkittyError {
+        SkittyError::StripPrefixError(err)
     }
 }

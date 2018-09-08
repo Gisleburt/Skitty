@@ -1,7 +1,5 @@
 #[macro_use]
 extern crate clap;
-#[macro_use]
-extern crate failure;
 
 extern crate skitty;
 
@@ -30,7 +28,8 @@ fn main() {
             }
         },
         _ => {
-            app.print_help();
+            app.print_help()
+                .expect("Can't print help, something's gone catastrophically wrong");
         },
     }
 
