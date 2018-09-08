@@ -3,10 +3,30 @@ Skitty
 
 Use sketch files with git.
 
+Work in Progress
+----------------
+
+The component parts work in software but the binary isn't complete.
+
+Features / To Do:
+- [x] Find sketch file and/or git folder
+- [x] Convert sketch to directory
+- [x] Convert directory to sketch
+- [x] Detect if sketch or git is newer
+- [x] Detect file system changes
+- [ ] If directory is newer, offer to extract at start
+- [ ] Once started, automatically update dir with sketch when sketch file saves
+
+
 Installation
 ------------
 
-Clone this repository and run `cargo install`.
+Once its complete you can install from cargo, or download binaries from
+[releases](https://github.com/Gisleburt/Skitty/releases).
+
+```shell
+$ cargo install skitty
+```
 
 Usage
 -----
@@ -21,14 +41,13 @@ containing directory and type:
 $ skitty watch <file>
 ```
 
-Skitty will look for which is newer, the directory or the file. If either the directory or the file
-doesn't exist, they will be created from the one that does exist.
-
 Example
 -------
 
 ```
-skitty/
+my-workspace/
+  .git/
+  .gitignore
   my-project.sketch
   my-project/
     pages/
