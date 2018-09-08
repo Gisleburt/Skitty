@@ -1,37 +1,14 @@
 use std::{
     borrow::Cow,
     env::current_dir,
-    path::{Path, PathBuf},
+    path::Path,
     ffi::OsStr,
-    fs::metadata,
 };
 
 use error::{SkittyError, SkittyResult};
 
-pub struct Project {
-    pub sketch_path: PathBuf,
-    pub git_path: PathBuf,
-}
 
-impl Project {
-    pub fn from<T>(path: T) -> SkittyResult<Project>
-        where T: AsRef<Path>
-    {
-        let absolute_path = make_absolute(&path)?;
-        Ok(Project {
-            sketch_path: make_sketch(absolute_path.as_ref())?.into(),
-            git_path: get_dir(absolute_path.as_ref())?.into(),
-        })
-    }
-
-    pub fn is_git_newer(&self) -> SkittyResult<bool> {
-        let sketch_mtime = metadata(&self.sketch_path)?.modified()?;
-        let git_mtime = metadata(&self.git_path)?.modified()?;
-        Ok(git_mtime > sketch_mtime)
-    }
-}
-
-fn make_absolute<'a>(path: &'a AsRef<Path>) -> SkittyResult<Cow<'a, Path>>
+pub fn make_absolute<'a>(path: &'a AsRef<Path>) -> SkittyResult<Cow<'a, Path>>
 {
     let path = path.as_ref();
     if path.is_absolute() {
@@ -54,9 +31,8 @@ fn is_sketch_file<T>(path: T) -> SkittyResult<bool>
     }
 }
 
-fn make_sketch<'a>(path: &'a Path) -> SkittyResult<Cow<'a, Path>>
+pub fn make_sketch<'a>(path: &'a Path) -> SkittyResult<Cow<'a, Path>>
 {
-//    let path = path.as_ref();
     if is_sketch_file(path)? {
         Ok(path.into())
     } else if path.is_dir() {
@@ -66,7 +42,7 @@ fn make_sketch<'a>(path: &'a Path) -> SkittyResult<Cow<'a, Path>>
     }
 }
 
-fn get_dir<'a>(path: &'a Path) -> SkittyResult<Cow<'a, Path>>
+pub fn get_dir<'a>(path: &'a Path) -> SkittyResult<Cow<'a, Path>>
 {
     if path.is_dir() {
         return Ok(path.into());

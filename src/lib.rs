@@ -4,14 +4,13 @@ extern crate notify;
 extern crate zip;
 
 mod error;
-mod fs_tools;
-mod zip_tools;
+mod project;
 
 use notify::{RecommendedWatcher, Watcher, RecursiveMode};
 use std::sync::mpsc::channel;
 use std::path::Path;
-use error::{SkittyError, SkittyResult};
-use fs_tools::Project;
+use error::SkittyResult;
+use project::Project;
 
 
 pub fn watch(path: &AsRef<Path>) -> SkittyResult<()>
