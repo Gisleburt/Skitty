@@ -1,6 +1,6 @@
 use std::{
-    io::{copy, prelude::*},
     fs::{File, create_dir_all, read_dir},
+    io::{copy, prelude::*},
     path::Path,
 };
 use zip::{
@@ -14,7 +14,7 @@ use zip::{
 use error::SkittyResult;
 
 /// Extract a zip file to a given dir
-pub fn zip_to_dir<T, U>(from: T, to: U) -> SkittyResult<()>
+fn zip_to_dir<T, U>(from: T, to: U) -> SkittyResult<()>
     where T: AsRef<Path>,
           U: AsRef<Path>,
 {
@@ -29,7 +29,7 @@ pub fn zip_to_dir<T, U>(from: T, to: U) -> SkittyResult<()>
 }
 
 /// Write a directory to a zip file
-pub fn dir_to_zip<T, U>(from: T, to: U) -> SkittyResult<()>
+fn dir_to_zip<T, U>(from: T, to: U) -> SkittyResult<()>
     where T: AsRef<Path>,
           U: AsRef<Path>,
 {
