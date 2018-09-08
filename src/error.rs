@@ -1,8 +1,11 @@
-use std::io::Error as IoError;
 use notify::Error as NotifyError;
 use zip::result::ZipError;
-use std::result::Result;
-use std::path::{PathBuf, StripPrefixError};
+use std::{
+    io::Error as IoError,
+    result::Result,
+    path::{PathBuf, StripPrefixError},
+    sync::mpsc::RecvError as ChannelReceiveError,
+};
 
 pub type SkittyResult<T> = Result<T, SkittyError>;
 
@@ -21,7 +24,9 @@ pub enum SkittyError {
     #[fail(display = "Something went wrong getting the dir name from the file name {:?}", _0)]
     UnknownDirProblem(PathBuf),
     #[fail(display = "Unable to make path relative while zipping {:?}", _0)]
-    StripPrefixError(StripPrefixError)
+    StripPrefixError(StripPrefixError),
+    #[fail(display = "Channel was broken, can not receive messages {:?}", _0)]
+    ChannelReceiveError(ChannelReceiveError),
 }
 
 impl From<NotifyError> for SkittyError {
@@ -45,5 +50,11 @@ impl From<IoError> for SkittyError {
 impl From<StripPrefixError> for SkittyError {
     fn from(err: StripPrefixError) -> SkittyError {
         SkittyError::StripPrefixError(err)
+    }
+}
+
+impl From<ChannelReceiveError> for SkittyError {
+    fn from(err: ChannelReceiveError) -> SkittyError {
+        SkittyError::ChannelReceiveError(err)
     }
 }

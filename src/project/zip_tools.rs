@@ -14,7 +14,7 @@ use zip::{
 use error::SkittyResult;
 
 /// Extract a zip file to a given dir
-fn zip_to_dir<T, U>(from: T, to: U) -> SkittyResult<()>
+pub fn zip_to_dir<T, U>(from: T, to: U) -> SkittyResult<()>
     where T: AsRef<Path>,
           U: AsRef<Path>,
 {
@@ -29,7 +29,7 @@ fn zip_to_dir<T, U>(from: T, to: U) -> SkittyResult<()>
 }
 
 /// Write a directory to a zip file
-fn dir_to_zip<T, U>(from: T, to: U) -> SkittyResult<()>
+pub fn dir_to_zip<T, U>(from: T, to: U) -> SkittyResult<()>
     where T: AsRef<Path>,
           U: AsRef<Path>,
 {
