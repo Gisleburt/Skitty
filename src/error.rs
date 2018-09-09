@@ -5,6 +5,7 @@ use std::{
     result::Result,
     path::{PathBuf, StripPrefixError},
     sync::mpsc::RecvError as ChannelReceiveError,
+    time::SystemTimeError,
 };
 
 pub type SkittyResult<T> = Result<T, SkittyError>;
@@ -29,6 +30,8 @@ pub enum SkittyError {
     FileSystemUnreadable(PathBuf),
     #[fail(display = "Channel was broken, can not receive messages {:?}", _0)]
     ChannelReceiveError(ChannelReceiveError),
+    #[fail(display = "Something went wrong comparing file times {:?}", _0)]
+    SystemTimeError(SystemTimeError)
 }
 
 impl From<NotifyError> for SkittyError {
@@ -58,5 +61,11 @@ impl From<StripPrefixError> for SkittyError {
 impl From<ChannelReceiveError> for SkittyError {
     fn from(err: ChannelReceiveError) -> SkittyError {
         SkittyError::ChannelReceiveError(err)
+    }
+}
+
+impl From<SystemTimeError> for SkittyError {
+    fn from(err: SystemTimeError) -> SkittyError {
+        SkittyError::SystemTimeError(err)
     }
 }

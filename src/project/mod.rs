@@ -5,12 +5,17 @@ use std::{
     fs::metadata,
     path::{Path, PathBuf},
     sync::mpsc::channel,
-    time::Duration,
+    time::{Duration, UNIX_EPOCH},
 };
 use notify::{RecommendedWatcher, Watcher, RecursiveMode};
 
-use error::SkittyResult;
-use project::fs_tools::{make_absolute, make_sketch, get_dir};
+use error::{SkittyError, SkittyResult};
+use project::fs_tools::{
+    make_absolute,
+    make_sketch,
+    newest_file_in_dir,
+    get_dir,
+};
 use project::zip_tools::{dir_to_zip, zip_to_dir};
 
 pub struct Project {
@@ -29,9 +34,17 @@ impl Project {
         })
     }
 
+//    pub fn is_git_newer(&self) -> SkittyResult<bool> {
+//        let sketch_mtime = metadata(&self.sketch_path)?.modified()?;
+//        let git_mtime = metadata(&self.git_path)?.modified()?;
+//        Ok(git_mtime.duration_since(UNIX_EPOCH)? > sketch_mtime.duration_since(UNIX_EPOCH)?)
+//    }
+
     pub fn is_git_newer(&self) -> SkittyResult<bool> {
         let sketch_mtime = metadata(&self.sketch_path)?.modified()?;
-        let git_mtime = metadata(&self.git_path)?.modified()?;
+        let oldest_git_file = newest_file_in_dir(&self.git_path)?
+            .ok_or(SkittyError::FileSystemUnreadable(self.git_path.clone()))?;
+        let git_mtime =  metadata(&oldest_git_file)?.modified()?;
         Ok(git_mtime > sketch_mtime)
     }
 
