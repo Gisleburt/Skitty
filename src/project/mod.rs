@@ -57,6 +57,5 @@ impl Project {
             self.sketch_to_git()?;
             println!("Sketch file has been deconstructed");
         }
-        Ok(())
     }
 }
