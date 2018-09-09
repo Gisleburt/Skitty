@@ -11,7 +11,7 @@ use zip::{
     ZipWriter,
 };
 
-use error::SkittyResult;
+use error::{SkittyError, SkittyResult};
 
 /// Extract a zip file to a given dir
 pub fn zip_to_dir<T, U>(from: T, to: U) -> SkittyResult<()>
@@ -19,10 +19,10 @@ pub fn zip_to_dir<T, U>(from: T, to: U) -> SkittyResult<()>
           U: AsRef<Path>,
 {
     create_dir_all(to.as_ref())?;
-    let file = File::open(from.as_ref()).expect("Couldn't open file");
+    let file = File::open(from.as_ref())?;
     let mut zip = ZipArchive::new(file)?;
     for i in 0..zip.len() {
-        let mut file = zip.by_index(i).unwrap();
+        let mut file = zip.by_index(i)?;
         zipfile_to_file(file, to.as_ref())?;
     }
     Ok(())
@@ -33,7 +33,7 @@ pub fn dir_to_zip<T, U>(from: T, to: U) -> SkittyResult<()>
     where T: AsRef<Path>,
           U: AsRef<Path>,
 {
-    let file = File::create(to.as_ref()).expect("Couldn't open file");
+    let file = File::create(to.as_ref())?;
     let mut zip = ZipWriter::new(file);
 
     dir_to_zip_recurse(&mut zip, from.as_ref(), from.as_ref())?;
@@ -51,9 +51,10 @@ fn zipfile_to_file<T>(mut zipfile: ZipFile, dir: T) -> SkittyResult<()>
         panic!("zip contained path traversal");
     }
 
-    create_dir_all(file_path.parent().expect("Could not open dir"))?;
+    create_dir_all(file_path.parent()
+        .ok_or(SkittyError::FileSystemUnreadable(file_path.clone()))?)?;
 
-    let mut file = File::create(&file_path).expect("Could not create file");
+    let mut file = File::create(&file_path)?;
     copy(&mut zipfile, &mut file)?;
     println!("{}", file_path.to_string_lossy());
     Ok(())
@@ -65,8 +66,8 @@ fn dir_to_zip_recurse<T, U>(zip: &mut ZipWriter<File>, dir: T, root: U) -> Skitt
           U: AsRef<Path>,
 {
     if dir.as_ref().is_dir() {
-        for entry in read_dir(dir).expect("Couldn't read dir") {
-            let entry = entry.expect("Something wrong with the entry");
+        for entry in read_dir(dir)? {
+            let entry = entry?;
             if entry.path().is_dir() {
                 dir_to_zip_recurse(zip, entry.path(), root.as_ref())?;
             }

@@ -14,8 +14,9 @@ Features / To Do:
 - [x] Convert directory to sketch
 - [x] Detect if sketch or git is newer
 - [x] Detect file system changes
+- [x] Once started, automatically update dir with sketch when sketch file saves
 - [ ] If directory is newer, offer to extract at start
-- [ ] Once started, automatically update dir with sketch when sketch file saves
+- [ ] Prettify JSON files
 
 
 Installation

@@ -25,6 +25,8 @@ pub enum SkittyError {
     UnknownDirProblem(PathBuf),
     #[fail(display = "Unable to make path relative while zipping {:?}", _0)]
     StripPrefixError(StripPrefixError),
+    #[fail(display = "Problem reading file system {:?}", _0)]
+    FileSystemUnreadable(PathBuf),
     #[fail(display = "Channel was broken, can not receive messages {:?}", _0)]
     ChannelReceiveError(ChannelReceiveError),
 }

@@ -1,8 +1,8 @@
 use std::{
     borrow::Cow,
     env::current_dir,
-    path::Path,
     ffi::OsStr,
+    path::Path,
 };
 
 use error::{SkittyError, SkittyResult};
