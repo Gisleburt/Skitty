@@ -2,38 +2,10 @@ use std::{
     borrow::Cow,
     env::current_dir,
     ffi::OsStr,
-    fs::{read_dir, metadata},
-    path::{Path, PathBuf},
+    path::Path,
 };
 
 use error::{SkittyError, SkittyResult};
-
-pub fn newest_file_in_dir(dir: &AsRef<Path>) -> SkittyResult<Option<PathBuf>>
-{
-    let mut oldest_entry = None;
-    if dir.as_ref().is_dir() {
-        for entry in read_dir(dir)? {
-            let entry = entry?;
-            if entry.path().is_dir() {
-                newest_file_in_dir(&entry.path())?;
-            }
-            if entry.path().is_file() {
-                if let Some(old_file) = oldest_entry {
-                    let old_file_time = metadata(&old_file)?.modified()?;
-                    let new_file_time = metadata(entry.path())?.modified()?;
-                    if new_file_time < old_file_time {
-                        oldest_entry = Some(entry.path())
-                    } else {
-                        oldest_entry = Some(old_file)
-                    }
-                } else {
-                    oldest_entry = Some(entry.path());
-                }
-            }
-        }
-    }
-    Ok(oldest_entry)
-}
 
 pub fn make_absolute<'a>(path: &'a AsRef<Path>) -> SkittyResult<Cow<'a, Path>>
 {

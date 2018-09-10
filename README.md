@@ -15,7 +15,7 @@ Features / To Do:
 - [x] Detect if sketch or git is newer
 - [x] Detect file system changes
 - [x] Once started, automatically update dir with sketch when sketch file saves
-- [ ] If directory is newer, offer to extract at start
+- [ ] **If directory is newer, offer to extract at start** Bugged 🤔
 - [ ] Prettify JSON files
 
 
