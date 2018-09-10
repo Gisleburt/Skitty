@@ -16,6 +16,7 @@ use project::fs_tools::{
     make_sketch,
     get_dir,
 };
+use project::json_tools::prettify_json_in_dir;
 use project::zip_tools::{dir_to_zip, zip_to_dir};
 
 pub struct Project {
@@ -42,11 +43,22 @@ impl Project {
 
 
     pub fn git_to_sketch(&self) -> SkittyResult<()> {
-        dir_to_zip(&self.git_path, &self.sketch_path)
+        println!("Combining sketch file");
+        dir_to_zip(&self.git_path, &self.sketch_path)?;
+        println!("Sketch file has been combined");
+
+        Ok(())
     }
 
     pub fn sketch_to_git(&self) -> SkittyResult<()> {
-        zip_to_dir(&self.sketch_path, &self.git_path)
+        println!("Extracting sketch file");
+        zip_to_dir(&self.sketch_path, &self.git_path)?;
+
+        println!("Applying after care");
+        prettify_json_in_dir(&self.git_path)?;
+        println!("Finished after care");
+
+        Ok(())
     }
 
     pub fn watch_sketch_file(&self) -> SkittyResult<()> {
@@ -61,7 +73,6 @@ impl Project {
             rx.recv()?;
             println!("Sketch file has changed");
             self.sketch_to_git()?;
-            println!("Sketch file has been deconstructed");
         }
     }
 }

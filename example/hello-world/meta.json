@@ -1,1 +1,31 @@
-{"commit":"120f488f43e85cae5c74eeae99d970dcf7fe443d","pagesAndArtboards":{"BEBD1391-55E7-4B33-9715-6C38F25EF254":{"name":"Page 1","artboards":{}}},"version":105,"fonts":["Lato-Light"],"compatibilityVersion":99,"app":"com.bohemiancoding.sketch3","autosaved":0,"variant":"NONAPPSTORE","created":{"commit":"120f488f43e85cae5c74eeae99d970dcf7fe443d","appVersion":"51.2","build":57519,"app":"com.bohemiancoding.sketch3","compatibilityVersion":99,"version":105,"variant":"NONAPPSTORE"},"saveHistory":["NONAPPSTORE.57519"],"appVersion":"51.2","build":57519}
+{
+  "autosaved": 0,
+  "variant": "NONAPPSTORE",
+  "saveHistory": [
+    "NONAPPSTORE.57519"
+  ],
+  "pagesAndArtboards": {
+    "BEBD1391-55E7-4B33-9715-6C38F25EF254": {
+      "artboards": {},
+      "name": "Page 1"
+    }
+  },
+  "app": "com.bohemiancoding.sketch3",
+  "compatibilityVersion": 99,
+  "appVersion": "51.2",
+  "version": 105,
+  "created": {
+    "app": "com.bohemiancoding.sketch3",
+    "appVersion": "51.2",
+    "build": 57519,
+    "commit": "120f488f43e85cae5c74eeae99d970dcf7fe443d",
+    "compatibilityVersion": 99,
+    "variant": "NONAPPSTORE",
+    "version": 105
+  },
+  "fonts": [
+    "Lato-Light"
+  ],
+  "build": 57519,
+  "commit": "120f488f43e85cae5c74eeae99d970dcf7fe443d"
+}

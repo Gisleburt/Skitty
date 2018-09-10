@@ -1,4 +1,5 @@
 use notify::Error as NotifyError;
+use serde_json::Error as JsonError;
 use zip::result::ZipError;
 use std::{
     io::Error as IoError,
@@ -20,18 +21,20 @@ pub enum SkittyError {
     IoError(IoError),
     #[fail(display = "Project not found: {:?}", _0)]
     ProjectNotFound(PathBuf),
-    #[fail(display = "{:?} is not a sketch file", _0)]
+    #[fail(display = "{:?} is not a sketch file or project directory", _0)]
     NotASketchFile(PathBuf),
-    #[fail(display = "Something went wrong getting the dir name from the file name {:?}", _0)]
+    #[fail(display = "Something went wrong getting the dir name from the file name: {:?}", _0)]
     UnknownDirProblem(PathBuf),
-    #[fail(display = "Unable to make path relative while zipping {:?}", _0)]
+    #[fail(display = "Unable to make path relative while zipping: {:?}", _0)]
     StripPrefixError(StripPrefixError),
-    #[fail(display = "Problem reading file system {:?}", _0)]
+    #[fail(display = "Problem reading file systemL {:?}", _0)]
     FileSystemUnreadable(PathBuf),
     #[fail(display = "Channel was broken, can not receive messages {:?}", _0)]
     ChannelReceiveError(ChannelReceiveError),
-    #[fail(display = "Something went wrong comparing file times {:?}", _0)]
-    SystemTimeError(SystemTimeError)
+    #[fail(display = "Something went wrong comparing file times: {:?}", _0)]
+    SystemTimeError(SystemTimeError),
+    #[fail(display = "Unable to read JSON: {:?}", _0)]
+    JsonError(JsonError),
 }
 
 impl From<NotifyError> for SkittyError {
@@ -67,5 +70,11 @@ impl From<ChannelReceiveError> for SkittyError {
 impl From<SystemTimeError> for SkittyError {
     fn from(err: SystemTimeError) -> SkittyError {
         SkittyError::SystemTimeError(err)
+    }
+}
+
+impl From<JsonError> for SkittyError {
+    fn from(err: JsonError) -> SkittyError {
+        SkittyError::JsonError(err)
     }
 }

@@ -1,6 +1,8 @@
 #[macro_use]
 extern crate failure;
 extern crate notify;
+extern crate serde;
+extern crate serde_json;
 extern crate zip;
 
 mod error;
