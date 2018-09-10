@@ -5,7 +5,11 @@ extern crate skitty;
 
 use clap::App;
 
-use skitty::watch;
+use skitty::{
+    extract,
+    combine,
+    watch,
+};
 
 fn main() {
     let yaml = load_yaml!("skitty.yaml");
@@ -16,6 +20,28 @@ fn main() {
     let matches = app.clone().get_matches();
 
     match matches.subcommand() {
+        ("extract", Some(matches)) => {
+            if let Some(file) = matches.value_of("FILE") {
+                if let Err(e) = extract(&file) {
+                    eprintln!("{}", e);
+                    std::process::exit(1);
+                }
+            } else {
+                eprintln!("You must specify a file or directory to watch");
+                std::process::exit(1);
+            }
+        },
+        ("combine", Some(matches)) => {
+            if let Some(file) = matches.value_of("FILE") {
+                if let Err(e) = combine(&file) {
+                    eprintln!("{}", e);
+                    std::process::exit(1);
+                }
+            } else {
+                eprintln!("You must specify a file or directory to watch");
+                std::process::exit(1);
+            }
+        },
         ("watch", Some(matches)) => {
             if let Some(file) = matches.value_of("FILE") {
                 if let Err(e) = watch(&file) {

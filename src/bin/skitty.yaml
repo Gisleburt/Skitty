@@ -2,8 +2,20 @@ name: skitty
 author: Daniel Mason <daniel@danielmason.com>
 about: Structures and destructures sketch files for use with git
 subcommands:
+  - extract:
+      about: Extract a sketch file into a directory
+      args:
+        - FILE:
+            index: 1
+            help: print debug information
+  - combine:
+      about: Combine a directory into a sketch file
+      args:
+        - FILE:
+            index: 1
+            help: print debug information
   - watch:
-      about: Watch for file changes and automatically structure or destructure the sketch file
+      about: Watch for file changes and automatically extract to a directory
       args:
         - FILE:
             index: 1

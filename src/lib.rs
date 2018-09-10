@@ -13,6 +13,17 @@ use std::{
 use error::{SkittyError, SkittyResult};
 use project::Project;
 
+pub fn extract(path: &AsRef<Path>) -> SkittyResult<()>
+{
+    let project = Project::from(path)?;
+    project.sketch_to_git()
+}
+
+pub fn combine(path: &AsRef<Path>) -> SkittyResult<()>
+{
+    let project = Project::from(path)?;
+    project.git_to_sketch()
+}
 
 pub fn watch(path: &AsRef<Path>) -> SkittyResult<()>
 {
