@@ -1,29 +1,18 @@
 Skitty
 ======
 
-Use sketch files with git.
+Sketch + Git + I love kitties! 😻
 
-Work in Progress
-----------------
+Use git to version sketch files
 
-The component parts work in software but the binary isn't complete.
-
-Features / To Do:
-- [x] Find sketch file and/or git folder
-- [x] Convert sketch to directory
-- [x] Convert directory to sketch
-- [x] Detect if sketch or git is newer
-- [x] Detect file system changes
-- [x] Once started, automatically update dir with sketch when sketch file saves
-- [ ] **If directory is newer, offer to extract at start** Bugged 🤔
-- [ ] Prettify JSON files
+> **WARNING:** This is an early release, back up your sketch files before use!
 
 
 Installation
 ------------
 
-Once its complete you can install from cargo, or download binaries from
-[releases](https://github.com/Gisleburt/Skitty/releases).
+If you're into Rust, you can install with Cargo, otherwise download the binaries from the
+[releases page](https://github.com/Gisleburt/Skitty/releases).
 
 ```shell
 $ cargo install skitty
@@ -34,23 +23,63 @@ Usage
 
 **Important:** This is likely to change prior to a 1.0 release depending on usage feedback.
 
-Skitty works by extracting the sketch file into its component files, into directory of the same name
-(sans the `.sketch` so that they can be version controlled in git. To get started, navigate to the
-containing directory and type:
+There are three functions:
+
+**Extract:**
 
 ```shell
-$ skitty watch <file>
+$ sketch extract my-designs.sketch
 ```
 
-Example
--------
+Will extract all of the files in your sketch file and place them into a folder of the same name,
+here it would be `my-designs/`.
+
+**Combine**
+
+```
+$ sketch combine my-design
+```
+
+Will combine all of the files in the `my-design` directory into a `my-design.sketch` file.
+
+**Watch**
+
+```shell
+$ skitty watch my-design.sketch
+```
+
+Will watch for changes in your sketch file and automatically extract them when it changes.
+
+Recommended usage:
+------------------
+
+Create a little workspace for your sketch files, initialise a git repository, and add `*.sketch` to
+a `.gitignore`.
+
+Copy sketch files into your workspace, it should look something like this
 
 ```
 my-workspace/
   .git/
   .gitignore
-  my-project.sketch
-  my-project/
+  my-amazing-signup-flow.sketch
+  my-awesome-login-flow.sketch
+```
+
+You can then use skitty to manage files that will be version controlled. From inside your workspace:
+
+```shell
+my-workspace $ skitty extact my-amazing-signup-flow
+```
+
+> Note, regardless of which direction you're going, whether you include the `.sketch` or not doesn't
+matter.
+
+```
+my-workspace/
+  .git/
+  .gitignore
+  my-amazing-signup-flow/
     pages/
       BEBD1391-55E7-4B33-9715-6C38F25EF254.json
     previews/
@@ -58,4 +87,8 @@ my-workspace/
     document.json
     meta.json
     user.json
+  my-amazing-signup-flow.sketch
+  my-awesome-login-flow.sketch
 ```
+
+You can now version control the extracted files!
